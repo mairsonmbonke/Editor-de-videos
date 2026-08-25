@@ -119,6 +119,36 @@ src/
 test/                testes das funções puras (node:test, sem dependências)
 ```
 
+## Publicação
+
+O app é totalmente estático — não tem servidor, banco nem chave de API —, então
+o GitHub Pages dá conta dele.
+
+A publicação é automática: a cada push na `main`, o workflow
+`.github/workflows/deploy.yml` roda o build e publica o `dist/`. Dá para
+republicar sob demanda pela aba **Actions → Publicar no GitHub Pages → Run
+workflow**.
+
+**Antes da primeira publicação**, é preciso ativar o Pages uma vez, à mão, em
+**Settings → Pages → Source: GitHub Actions**. Esse passo não dá para
+automatizar: ativar o Pages exige um token com permissão de administração, que
+o `GITHUB_TOKEN` do workflow não tem. Enquanto não for ativado, o job falha
+logo no passo "Conferir a configuração do Pages", com a mensagem apontando para
+essa configuração.
+
+Feito isso, o endereço é:
+
+```
+https://mairsonmbonke.github.io/Editor-de-videos/
+```
+
+O caminho `/Editor-de-videos/` é o nome do repositório, e o `vite.config.ts`
+usa esse prefixo no build (em desenvolvimento a aplicação segue na raiz). Se o
+repositório for renomeado, ajuste a constante `BASE_PAGES`.
+
+Como tudo roda no navegador do visitante, publicar não expõe nada: os vídeos
+continuam sem sair da máquina de quem usa.
+
 ## Compatibilidade
 
 Chrome e Edge recentes cobrem tudo, incluindo a exportação em MP4. Safari 17+ e
