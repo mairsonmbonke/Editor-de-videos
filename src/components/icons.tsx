@@ -200,3 +200,23 @@ export const IconLock = svg(
     <path d="M8 10V7.5a4 4 0 0 1 8 0V10" />
   </>,
 )
+export const IconStop = svg(<rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor" stroke="none" />)
+export const IconPencil = svg(
+  <>
+    <path d="M4 20h4.5L20 8.5a2.12 2.12 0 0 0-3-3L5.5 17z" />
+    <path d="M14.5 7 17 9.5" />
+  </>,
+)
+export const IconClipboard = svg(
+  <>
+    <rect x="8" y="3.5" width="8" height="4" rx="1.4" />
+    <path d="M9 5.5H7a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-11a2 2 0 0 0-2-2h-2" />
+  </>,
+)
+export const IconSpeaker = svg(
+  <>
+    <path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" />
+    <path d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+    <path d="M18 6.7a7.5 7.5 0 0 1 0 10.6" />
+  </>,
+)
