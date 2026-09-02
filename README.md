@@ -7,6 +7,11 @@ removê-los todos de uma vez**, cortando boa parte do tempo gasto na edição.
 Nenhum arquivo é enviado para servidor: o vídeo é lido do disco, analisado com a
 Web Audio API e exportado localmente.
 
+O mesmo site publica uma segunda página, independente do editor:
+[**leitura de textos em voz alta**](#leitura-de-textos-em-voz-alta) (`leitor.html`),
+que lê em português, inglês ou espanhol o texto colado, digitado ou aberto de um
+arquivo PDF, Word ou TXT.
+
 ## Como rodar
 
 ```bash
@@ -19,8 +24,11 @@ Outros comandos:
 ```bash
 npm run build     # verificação de tipos + build de produção em dist/
 npm run preview   # serve o build de produção
-npm test          # testes das funções de detecção e do modelo de blocos
+npm test          # testes das funções puras (silêncio, blocos, leitura, documentos)
 ```
+
+Duas páginas: `http://localhost:5173/` é o editor de vídeo e
+`http://localhost:5173/leitor.html` é a leitura em voz alta.
 
 ## Fluxo de uso
 
@@ -101,9 +109,55 @@ Consequências práticas:
 - O formato preferido é MP4 (H.264/AAC). Em navegadores que não gravam MP4, o
   arquivo sai em WebM e a interface avisa antes de começar.
 
+## Leitura de textos em voz alta
+
+Página `leitor.html`, feita para acompanhar a leitura com os olhos enquanto se
+ouve. Usa a síntese de voz do próprio navegador (Web Speech API), então também
+funciona sem internet depois de carregada e não manda o texto para lugar nenhum.
+
+**Como usar**
+
+1. Cole, digite ou abra um arquivo (**Arquivo**, ou arraste-o para cima do texto).
+2. Escolha o idioma — **português, inglês ou espanhol** —, a voz e a velocidade.
+3. **Iniciar**, **Pausar**, **Continuar** e **Parar** comandam a leitura.
+4. Durante a leitura, **um clique em qualquer palavra continua dali**: dá para
+   pular um parágrafo inteiro ou voltar para ouvir de novo.
+5. A frase em leitura fica realçada e a palavra falada, destacada; a página rola
+   sozinha para acompanhar.
+
+O texto, o idioma, a voz e a velocidade ficam salvos no navegador para a próxima
+visita. `espaço` alterna entre ouvir e pausar, e `Esc` para.
+
+**Arquivos aceitos**
+
+| Formato | Como o texto é extraído |
+| --- | --- |
+| PDF | `pdf.js`, página a página; as linhas soltas do PDF são remontadas em parágrafos |
+| Word `.docx` | o `.docx` é um zip: o `word/document.xml` é descompactado e lido |
+| OpenDocument `.odt` | mesma ideia, com o `content.xml` |
+| `.txt`, `.md`, `.csv` | lidos direto |
+
+Limite de 30 MB por arquivo. PDFs digitalizados (imagem, sem texto selecionável)
+e o formato antigo `.doc` não dão para ler — nos dois casos a página explica o
+motivo em vez de falhar em silêncio. As bibliotecas de PDF e de descompactação
+só são baixadas quando alguém abre um arquivo desses.
+
+**Como a leitura acompanha o texto**
+
+O texto é dividido em trechos — em geral uma frase, com quebra extra nas frases
+muito longas —, e cada trecho guarda a posição exata em que começa e termina no
+texto original. É essa posição que liga as três pontas: o pedaço mandado para a
+voz, o destaque na tela e o ponto em que a leitura recomeça no clique. Falar
+frase a frase, em vez de mandar o texto inteiro, ainda contorna o limite que os
+navegadores impõem a falas longas e faz a troca de voz, de velocidade ou de
+ponto ser quase instantânea.
+
 ## Estrutura
 
 ```
+index.html           editor de vídeo
+leitor.html          leitura de textos em voz alta
+
 src/
   lib/
     audio.ts       decodificação do áudio, picos e RMS por janela
@@ -111,11 +165,15 @@ src/
     clips.ts       modelo de blocos: layout, divisão, resumo, durações
     export.ts      gravação do vídeo final e download
     format.ts      formatação de tempo, duração e tamanho em pt-BR
+    leitura.ts     divisão do texto em trechos e palavras, com as posições
+    vozes.ts       idiomas oferecidos e escolha da voz do navegador
+    documento.ts   texto de arquivos PDF, .docx, .odt e texto puro
   state/
     editorReducer.ts   estado do editor com histórico por vídeo
     usePlayback.ts     reprodução que pula os trechos removidos
   components/        Login, Editor, MediaSidebar, Transport, Timeline,
                      Waveform, Inspector, ExportDialog, Toasts, icons
+  leitor/            Leitor, Frase e useLeitura (a página de voz alta)
 test/                testes das funções puras (node:test, sem dependências)
 ```
 
@@ -139,7 +197,8 @@ essa configuração.
 Feito isso, o endereço é:
 
 ```
-https://mairsonmbonke.github.io/Editor-de-videos/
+https://mairsonmbonke.github.io/Editor-de-videos/            (editor de vídeo)
+https://mairsonmbonke.github.io/Editor-de-videos/leitor.html (leitura em voz alta)
 ```
 
 O caminho `/Editor-de-videos/` é o nome do repositório, e o `vite.config.ts`
@@ -155,3 +214,10 @@ Chrome e Edge recentes cobrem tudo, incluindo a exportação em MP4. Safari 17+ 
 Firefox reproduzem e editam normalmente; a exportação pode sair em WebM
 dependendo da versão. Os formatos de entrada aceitos são os que o próprio
 navegador consegue decodificar (MP4/H.264, WebM, MOV).
+
+A leitura em voz alta funciona no Chrome, no Edge, no Safari (incluindo iPhone e
+iPad) e no Chrome do Android. As vozes vêm do sistema operacional, então a lista
+muda de aparelho para aparelho — se não houver nenhuma voz do idioma escolhido,
+a página avisa. No Android o `pause()` do navegador costuma ser ignorado; nesse
+caso a fala é cortada e o **Continuar** recomeça exatamente da palavra em que
+parou.

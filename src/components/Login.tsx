@@ -103,6 +103,10 @@ export function Login({ onEnter }: LoginProps) {
           <IconLock size={12} /> Sessão local de demonstração. Qualquer e-mail válido e uma senha de 4 caracteres
           funcionam — os vídeos nunca saem do seu computador.
         </p>
+
+        <a className="login__outro" href="./leitor.html">
+          Leitura de textos em voz alta
+        </a>
       </div>
     </div>
   )
